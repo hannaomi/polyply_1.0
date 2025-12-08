@@ -213,13 +213,13 @@ def test_gen_seq(tmp_path,
 
     with open(ref_file) as _file:
         js_graph = json.load(_file)
-        if Version(nx.__version__) < Version(3.6):
+        if Version(nx.__version__) < Version('3.6'):
             js_graph["lins"] == js_graph["edges"]
         ref_graph = json_graph.node_link_graph(js_graph)
 
     with open(outpath) as _file:
         js_graph = json.load(_file)
-        if Version(nx.__version__) < Version(3.6):
+        if Version(nx.__version__) < Version('3.6'):
             js_graph["lins"] == js_graph["edges"]
         out_graph = json_graph.node_link_graph(js_graph)
 
