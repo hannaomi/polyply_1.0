@@ -219,8 +219,6 @@ def test_gen_seq(tmp_path,
 
     with open(outpath) as _file:
         js_graph = json.load(_file)
-        if Version(nx.__version__) < Version('3.6'):
-            js_graph["links"] = js_graph["edges"]
         out_graph = json_graph.node_link_graph(js_graph)
 
     assert nx.is_isomorphic(out_graph, ref_graph)
