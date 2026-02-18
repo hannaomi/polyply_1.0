@@ -1,0 +1,222 @@
+[ citations ]
+Martini2
+M2_PLGA
+
+; =============================================================================
+; PLGA (poly(lactic-co-glycolic acid)) Martini 2 / polyply .ff parameter file
+;
+; Based on the supporting information of:
+; "A coarse-grained molecular dynamics description of docetaxel-conjugate release
+;  from PLGA matrices" (Pannuzzo et al.), Figure S1 (bond/angle/dihedral targets).
+;
+; This file defines PLGA monomers as *single-bead* residues so that polyply can
+; build arbitrary LA/GA sequences (like the Martini2 DNA .ff pattern).
+;
+; Published parameters explicitly available in the SI:
+;   Bonds:
+;     XL–YG   b0=0.377 nm  k=25000 kJ/mol/nm^2
+;     YG–XL   b0=0.352 nm  k=25000 kJ/mol/nm^2
+;   Angles:
+;     XL–YG–XL  theta0=133.5 deg  k=30 kJ/mol
+;     YG–XL–YG  theta0=109.0 deg  k=50 kJ/mol
+;   Proper dihedrals are reported for stereochemical variants (XLL/XLD) in Fig S1;
+;   encoding 4-residue dihedrals may require '++' atom addressing, which is not
+;   used in the provided DNA example. An *optional* (commented) dihedral block is
+;   therefore included at the end for users to test.
+;
+;   Use with MARTINI2.2
+; =============================================================================
+
+; -----------------------------------------------------------------------------;
+; Residues (single bead each)
+; -----------------------------------------------------------------------------;
+
+[ moleculetype ]
+LA 1
+[ atoms ]
+1 Na 1 LA BB 1 0.0 72.0
+
+[ moleculetype ]
+GA 1
+[ atoms ]
+1 Na 1 GA BB 1 0.0 72.0
+
+[ moleculetype ]
+LAL 1
+[ atoms ]
+1 Na 1 LAL BB 1 0.0 72.0
+
+[ moleculetype ]
+LAD 1
+[ atoms ]
+1 Na 1 LAD BB 1 0.0 72.0
+
+
+[ moleculetype ]
+ESTter 1
+[ atoms ]
+1 P1 1 ESTter TE 1 0.0 72.0
+
+[ moleculetype ]
+ACIDter 1
+[ atoms ]
+1 P3 1 ACIDter TA 1 0.0 72.0
+
+; Optional: hydroxyl termination (matches the residue name you used: OHter).
+; Keeping this here makes LA/GA - OHter sequences connected.
+[ moleculetype ]
+OHter 1
+[ atoms ]
+1 SP2 1 OHter OH 1 0.0 45.0
+
+; -----------------------------------------------------------------------------;
+; Links (inter-residue connectivity)
+; -----------------------------------------------------------------------------;
+
+; LA -> GA bond (XL–YG)
+[ link ]
+[ atoms ]
+BB  { "resname": "LA|LAL|LAD" }
++BB { "resname": "GA" }
+[ bonds ]
+BB +BB 1 0.37700 25000 {"group": "backbone"}
+[ edges ]
+BB +BB
+
+; GA -> LA bond (YG–XL)
+[ link ]
+[ atoms ]
+BB  { "resname": "GA" }
++BB { "resname": "LA|LAL|LAD" }
+[ bonds ]
+BB +BB 1 0.35200 25000 {"group": "backbone"}
+[ edges ]
+BB +BB
+
+; Fallback bond for same-type neighbors or other combinations (not reported in SI)
+; Chosen as the average of the two published lengths (0.377 and 0.352 nm).
+[ link ]
+[ atoms ]
+BB  { "resname": "LA|GA|LAL|LAD" }
++BB { "resname": "LA|GA|LAL|LAD" }
+[ bonds ]
+BB +BB 1 0.36450 25000 {"group": "backbone_fallback"}
+[ edges ]
+BB +BB
+
+; -----------------------------------------------------------------------------;
+; Termination links (make end beads connected)
+; -----------------------------------------------------------------------------;
+
+; Any monomer -> hydroxyl terminus
+[ link ]
+[ atoms ]
+BB  { "resname": "LA|GA|LAL|LAD" }
++OH { "resname": "OHter" }
+[ bonds ]
+BB +OH 1 0.36450 25000 {"group": "terminal"}
+[ edges ]
+BB +OH
+
+; Any monomer -> ester terminus
+[ link ]
+[ atoms ]
+BB  { "resname": "LA|GA|LAL|LAD" }
++TE { "resname": "ESTter" }
+[ bonds ]
+BB +TE 1 0.36450 25000 {"group": "terminal"}
+[ edges ]
+BB +TE
+
+; Any monomer -> acid terminus
+[ link ]
+[ atoms ]
+BB  { "resname": "LA|GA|LAL|LAD" }
++TA { "resname": "ACIDter" }
+[ bonds ]
+BB +TA 1 0.36450 25000 {"group": "terminal"}
+[ edges ]
+BB +TA
+
+; -----------------------------------------------------------------------------;
+; Angles spanning three consecutive monomers
+; -----------------------------------------------------------------------------;
+
+; XL–YG–XL  (LA–GA–LA)
+[ link ]
+[ atoms ]
+-BB { "resname": "LA|LAL|LAD" }
+BB  { "resname": "GA" }
++BB { "resname": "LA|LAL|LAD" }
+[ angles ]
+-BB BB +BB 2 133.50000 30.0 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
+
+; YG–XL–YG  (GA–LA–GA)
+[ link ]
+[ atoms ]
+-BB { "resname": "GA" }
+BB  { "resname": "LA|LAL|LAD" }
++BB { "resname": "GA" }
+[ angles ]
+-BB BB +BB 2 109.00000 50.0 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
+
+; Fallback angle (not reported in SI)
+[ link ]
+[ atoms ]
+-BB { "resname": "LA|GA|LAL|LAD" }
+BB  { "resname": "LA|GA|LAL|LAD" }
++BB { "resname": "LA|GA|LAL|LAD" }
+[ angles ]
+-BB BB +BB 2 120.00000 25.0 {"group": "backbone_fallback"}
+[ edges ]
+-BB BB
+BB +BB
+
+; -----------------------------------------------------------------------------;
+; Terminal angles (NOT reported in SI; pragmatic defaults)
+; These only affect the last three beads (...-monomer-monomer-terminus)
+; -----------------------------------------------------------------------------;
+
+; ... BB - BB - OHter
+[ link ]
+[ atoms ]
+-BB { "resname": "LA|GA|LAL|LAD" }
+BB  { "resname": "LA|GA|LAL|LAD" }
++OH { "resname": "OHter" }
+[ angles ]
+-BB BB +OH 2 120.00000 25.0 {"group": "terminal"}
+[ edges ]
+-BB BB
+BB +OH
+
+; ... BB - BB - ESTter
+[ link ]
+[ atoms ]
+-BB { "resname": "LA|GA|LAL|LAD" }
+BB  { "resname": "LA|GA|LAL|LAD" }
++TE { "resname": "ESTter" }
+[ angles ]
+-BB BB +TE 2 120.00000 25.0 {"group": "terminal"}
+[ edges ]
+-BB BB
+BB +TE
+
+; ... BB - BB - ACIDter
+[ link ]
+[ atoms ]
+-BB { "resname": "LA|GA|LAL|LAD" }
+BB  { "resname": "LA|GA|LAL|LAD" }
++TA { "resname": "ACIDter" }
+[ angles ]
+-BB BB +TA 2 120.00000 25.0 {"group": "terminal"}
+[ edges ]
+-BB BB
+BB +TA
+
+
