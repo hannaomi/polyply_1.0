@@ -1,12 +1,16 @@
+;--------------------------------------------------
+; PLGA vermouth force field fragment for polyply
+; Parameters from Pannuzzo et al. Biomacromolecules 2022
+; For use with MARTINI 2.2 / Martini2 library in polyply.
+;--------------------------------------------------
+
 [ citations ]
 Martini2
 M2_PLGA
 
-;---------------------------
-;   Parameters from https://pubs.acs.org/doi/10.1021/acs.biomac.2c00903
-;   Use with MARTINI2.2
-
+;==================================================
 ; Residues (single bead each)
+;==================================================
 
 [ moleculetype ]
 LA 1
@@ -19,19 +23,21 @@ GA 1
 1 Na 1 GA BB 1 0.0 72.0
 
 [ moleculetype ]
-LAL 1
+LAL 1 ; L-Lactic acid
 [ atoms ]
 1 Na 1 LAL BB 1 0.0 72.0
 
 [ moleculetype ]
-LAD 1
+LAD 1 ; D-Lactic acid
 [ atoms ]
 1 Na 1 LAD BB 1 0.0 72.0
 
-;------------------------------------------
-; Links (inter-residue connectivity)
 
-; LA -> GA bond (XL–YG)
+;==================================================
+; SPECIFIC BACKBONE BONDS
+;==================================================
+
+; LA/LAL/LAD -> GA  (X–Y)
 [ link ]
 [ atoms ]
 BB  { "resname": "LA|LAL|LAD" }
@@ -41,7 +47,7 @@ BB +BB 1 0.37700 25000 {"group": "backbone"}
 [ edges ]
 BB +BB
 
-; GA -> LA bond (YG–XL)
+; GA -> LA/LAL/LAD  (Y–X)
 [ link ]
 [ atoms ]
 BB  { "resname": "GA" }
@@ -51,21 +57,12 @@ BB +BB 1 0.35200 25000 {"group": "backbone"}
 [ edges ]
 BB +BB
 
-; Fallback bond for same-type neighbors or other combinations (not reported in SI but validated)
-; Chosen as the average of the two published lengths (0.377 and 0.352 nm).
-[ link ]
-[ atoms ]
-BB  { "resname": "LA|GA|LAL|LAD" }
-+BB { "resname": "LA|GA|LAL|LAD" }
-[ bonds ]
-BB +BB 1 0.36450 25000 {"group": "backbone_fallback"}
-[ edges ]
-BB +BB
 
-;--------------------------------------------------
-; Angles spanning three consecutive monomers
+;==================================================
+; SPECIFIC BACKBONE ANGLES
+;==================================================
 
-; XL–YG–XL  (LA–GA–LA)
+; X–Y–X  (LA-family–GA–LA-family)
 [ link ]
 [ atoms ]
 -BB { "resname": "LA|LAL|LAD" }
@@ -77,7 +74,7 @@ BB  { "resname": "GA" }
 -BB BB
 BB +BB
 
-; YG–XL–YG  (GA–LA–GA)
+; Y–X–Y  (GA–LA-family–GA)
 [ link ]
 [ atoms ]
 -BB { "resname": "GA" }
@@ -89,12 +86,162 @@ BB  { "resname": "LA|LAL|LAD" }
 -BB BB
 BB +BB
 
-; Fallback angle (not reported in SI but validated)
+
+;==================================================
+; SPECIFIC BACKBONE DIHEDRALS
+;==================================================
+
+;--------------------------------------------------
+; LAD–GA–LAL–GA
+; From paper: -70 (2.21)
+;--------------------------------------------------
 [ link ]
 [ atoms ]
--BB { "resname": "LA|GA|LAL|LAD" }
-BB  { "resname": "LA|GA|LAL|LAD" }
-+BB { "resname": "LA|GA|LAL|LAD" }
+-BB  { "resname": "LAD" }
+BB   { "resname": "GA" }
++BB  { "resname": "LAL" }
+++BB { "resname": "GA" }
+[ dihedrals ]
+-BB BB +BB ++BB  1  -70.0   2.21   1 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+;--------------------------------------------------
+; GA-LAL-GA-LAD
+; From paper: 130.0 (0.5)
+;--------------------------------------------------
+
+[ link ]
+[ atoms ]
+-BB  { "resname": "GA" }
+BB   { "resname": "LAL" }
++BB  { "resname": "GA" }
+++BB { "resname": "LAD" }
+[ dihedrals ]
+-BB BB +BB ++BB  1  130.0   0.5   1 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+;--------------------------------------------------
+; LAL–GA–LAD–GA
+; From paper: 70 (2.21)
+;--------------------------------------------------
+[ link ]
+[ atoms ]
+-BB  { "resname": "LAL" }
+BB   { "resname": "GA" }
++BB  { "resname": "LAD" }
+++BB { "resname": "GA" }
+[ dihedrals ]
+-BB BB +BB ++BB  1   70.0   2.21   1 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+
+;--------------------------------------------------
+; GA–LAD–GA–LAL
+; From paper: -130 (0.52), 180 (0.51, 0.23) [and implied 70 (2.21) not listed here]
+;--------------------------------------------------
+[ link ]
+[ atoms ]
+-BB  { "resname": "GA" }
+BB   { "resname": "LAD" }
++BB  { "resname": "GA" }
+++BB { "resname": "LAL" }
+[ dihedrals ]
+-BB BB +BB ++BB  1  -130.0  0.52   1 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+
+;==================================================
+; Keep generic alternating dihedrals for LA/GA when LA is not
+; split into LAL/LAD (e.g., sequences using "LA" only which will be recognised by polyply).
+;==================================================
+
+; LA-family–GA–LA-family–GA (generic)
+[ link ]
+[ atoms ]
+-BB  { "resname": "LA" }
+BB   { "resname": "GA" }
++BB  { "resname": "LA" }
+++BB { "resname": "GA" }
+[ dihedrals ]
+-BB BB +BB ++BB  1  -70.0   2.21   1 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+; GA–LA-family–GA–LA-family (generic)
+[ link ]
+[ atoms ]
+-BB  { "resname": "GA" }
+BB   { "resname": "LA" }
++BB  { "resname": "GA" }
+++BB { "resname": "LA" }
+[ dihedrals ]
+-BB BB +BB ++BB  1   70.0   2.21   1 {"group": "backbone"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+
+;==================================================
+; FALLBACK INTERACTIONS
+; (ONLY identical neighbors – will NOT override X–GA)
+;==================================================
+
+;----------------------------------
+; Fallback bonds (LA-family–LA-family, GA–GA)
+
+[ link ]
+[ atoms ]
+BB  { "resname": "LA|LAL|LAD" }
++BB { "resname": "LA|LAL|LAD" }
+[ bonds ]
+BB +BB 1 0.36450 25000 {"group": "backbone_fallback"}
+[ edges ]
+BB +BB
+
+[ link ]
+[ atoms ]
+BB  { "resname": "GA" }
++BB { "resname": "GA" }
+[ bonds ]
+BB +BB 1 0.36450 25000 {"group": "backbone_fallback"}
+[ edges ]
+BB +BB
+
+
+;----------------------------------
+; Fallback angles (LA-family–LA-family–LA-family, GA–GA–GA)
+
+[ link ]
+[ atoms ]
+-BB { "resname": "LA|LAL|LAD" }
+BB  { "resname": "LA|LAL|LAD" }
++BB { "resname": "LA|LAL|LAD" }
+[ angles ]
+-BB BB +BB 2 120.00000 25.0 {"group": "backbone_fallback"}
+[ edges ]
+-BB BB
+BB +BB
+
+[ link ]
+[ atoms ]
+-BB { "resname": "GA" }
+BB  { "resname": "GA" }
++BB { "resname": "GA" }
 [ angles ]
 -BB BB +BB 2 120.00000 25.0 {"group": "backbone_fallback"}
 [ edges ]
@@ -102,4 +249,31 @@ BB  { "resname": "LA|GA|LAL|LAD" }
 BB +BB
 
 
+;----------------------------------
+; Fallback dihedral (identical residues only)
 
+[ link ]
+[ atoms ]
+-BB  { "resname": "LA|LAL|LAD" }
+BB   { "resname": "LA|LAL|LAD" }
++BB  { "resname": "LA|LAL|LAD" }
+++BB { "resname": "LA|LAL|LAD" }
+[ dihedrals ]
+-BB BB +BB ++BB  1  180.0  1.0  1 {"group": "backbone_fallback"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
+
+[ link ]
+[ atoms ]
+-BB  { "resname": "GA" }
+BB   { "resname": "GA" }
++BB  { "resname": "GA" }
+++BB { "resname": "GA" }
+[ dihedrals ]
+-BB BB +BB ++BB  1  180.0  1.0  1 {"group": "backbone_fallback"}
+[ edges ]
+-BB BB
+BB +BB
++BB ++BB
